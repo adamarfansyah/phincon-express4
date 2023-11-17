@@ -326,7 +326,7 @@ _Response (500 - Server Error)_
 }
 ```
 
-#### User Profile
+#### User Detail
 
 ```http
     GET /api/user/:identifier(id or email)
@@ -335,7 +335,56 @@ _Response (500 - Server Error)_
 _Request Header_
 
 ```
-Bearer Token as Admin on Login or Super Admin
+Bearer Token as Super Admin
+```
+
+_Request Body_
+
+```
+not needed
+```
+
+_Request Params_
+
+```
+id or email user
+```
+
+_Response (200)_
+
+```
+{
+    "data": [<data_user>],
+    "status": "Success"
+}
+```
+
+_Response (404 - User Not Found)_
+
+```
+{
+    "message": "User Not Found"
+}
+```
+
+_Response (500 - Server Error)_
+
+```
+{
+    "message": "Server Error"
+}
+```
+
+#### User Profile
+
+```http
+    GET /api/user/user-profile/
+```
+
+_Request Header_
+
+```
+Bearer Token as User Login
 ```
 
 _Request Body_
