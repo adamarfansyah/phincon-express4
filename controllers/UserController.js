@@ -53,6 +53,12 @@ exports.createUser = async (req, res) => {
       },
     });
 
+    const role = await Role.findByPk(id);
+
+    if (!role) {
+      return res.status(404).send(SendResponse(404, "Role Not Found", null, null));
+    }
+
     if (user) {
       return res.status(400).send(SendResponse(400, "User Already Exist", null, null));
     }

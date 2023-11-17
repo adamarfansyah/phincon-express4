@@ -33,7 +33,7 @@ exports.getCategory = async (req, res) => {
 
 exports.createCategory = async (req, res) => {
   try {
-    const { categoryName } = req.params;
+    const { categoryName } = req.body;
     const category = await Category.findOne({ where: { categoryName } });
 
     if (category) {

@@ -20,8 +20,16 @@ exports.getInventories = async (_, res) => {
 
 exports.getInventory = async (req, res) => {
   try {
-    const { id } = req.params;
-    const inventory = await Inventory.findByPk(id, {
+    const { identifier } = req.params;
+
+    if (!identifier) {
+      return res.status(400).json({ message: "Bad Request: ID or email is missing" });
+    }
+
+    const inventory = await Inventory.findOne({
+      where: {
+        [Op.or]: [{ id: identifier }, { name: identifier }],
+      },
       include: { model: Category, as: "inventoryCategory", attributes: ["id", "categoryName"] },
       attributes: ["id", "name", "count", "description", "categoryId"],
     });
