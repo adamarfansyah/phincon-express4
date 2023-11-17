@@ -3,6 +3,7 @@ const SendResponse = require("../helpers/SendResponse.js");
 const { Op } = require("sequelize");
 
 const { Inventory, Category } = require("../models/index.js");
+const UploadToImgbb = require("../helpers/UploadToImgbb.js");
 
 exports.getInventories = async (_, res) => {
   try {
@@ -38,9 +39,12 @@ exports.getInventory = async (req, res) => {
 exports.createInventory = async (req, res) => {
   try {
     const { name, count, description, categoryId } = req.body;
+    const { image } = req.files;
 
+    const imageUrl = await UploadToImgbb(image);
     const isInventoryExist = await Inventory.findOne({ where: { name } });
     const isCategoryExist = await Category.findByPk(categoryId);
+
     if (isInventoryExist) {
       return res.status(400).send(SendResponse(400, "Inventory Name already used", null, null));
     }
@@ -53,12 +57,18 @@ exports.createInventory = async (req, res) => {
       name: Joi.string().required(),
       count: Joi.number().required(),
       description: Joi.string().min(5).max(100).required(),
+      imageUrl: Joi.string().required(),
       categoryId: Joi.number().required(),
     });
 
-    const newInventory = { name, count, description, categoryId };
+    const newInventory = { name, count, description, categoryId, imageUrl };
 
     const { error } = schema.validate(newInventory);
+
+    if (error && error.details[0].path[0] === "image" && error.details[0].type === "binary.max") {
+      return res.status(400).send(SendResponse(400, "Image size exceeds the limit.", null, null));
+    }
+
     if (error) {
       return res.status(400).send(SendResponse(400, error.details[0].message, null, null));
     }
@@ -74,6 +84,8 @@ exports.updateInventoryProfile = async (req, res) => {
   try {
     const { id } = req.params;
     const { name, description, categoryId } = req.body;
+    const { image } = req.files;
+
     const inventory = await Inventory.findByPk(id);
     const category = await Category.findByPk(categoryId);
 
@@ -92,13 +104,16 @@ exports.updateInventoryProfile = async (req, res) => {
       }
     }
 
+    const imageUrl = await UploadToImgbb(image);
+
     const schema = Joi.object({
       name: Joi.string().required(),
       description: Joi.string().min(5).max(100).required(),
+      imageUrl: Joi.string().required(),
       categoryId: Joi.number().required(),
     });
 
-    const updatedInventory = { name, description, categoryId };
+    const updatedInventory = { name, description, categoryId, imageUrl };
     const { error } = schema.validate(updatedInventory);
     if (error) {
       return res.status(400).send(SendResponse(400, error.details[0].message, null, null));

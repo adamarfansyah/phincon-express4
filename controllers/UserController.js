@@ -161,26 +161,31 @@ exports.updateUserPassword = async (req, res) => {
     const { password, confirmPassword } = req.body;
 
     const user = await User.findByPk(id);
+
     if (!user) {
       return res.status(404).send(SendResponse(404, "User Not Found", null, null));
     }
 
-    const schema = Joi.object({
-      password: Joi.string().pattern(new RegExp("^[a-zA-Z0-9]{3,30}$")).required(),
-      confirmPassword: Joi.ref("password"),
-    });
+    if (user.id === res.locals.id || res.locals.roleId === 1) {
+      const schema = Joi.object({
+        password: Joi.string().pattern(new RegExp("^[a-zA-Z0-9]{3,30}$")).required(),
+        confirmPassword: Joi.ref("password"),
+      });
 
-    const { error } = schema.validate({ password, confirmPassword });
-    if (error) {
-      return res.status(400).send(SendResponse(400, error.details[0].message, null, null));
+      const { error } = schema.validate({ password, confirmPassword });
+      if (error) {
+        return res.status(400).send(SendResponse(400, error.details[0].message, null, null));
+      }
+
+      const passwordHashed = await PasswordHashing(password);
+
+      const newUserPassword = await user.update({ password: passwordHashed });
+      return res
+        .status(201)
+        .send(SendResponse(201, "Success Update Password", null, newUserPassword));
     }
 
-    const passwordHashed = await PasswordHashing(password);
-
-    const newUserPassword = await user.update({ password: passwordHashed });
-    return res
-      .status(201)
-      .send(SendResponse(201, "Success Update Password", null, newUserPassword));
+    return res.status(403).send(SendResponse(403, "Forbidden", null, null));
   } catch (error) {
     return res.status(500).send(SendResponse(500, "Internal Server Error", error, null));
   }
@@ -231,11 +236,6 @@ exports.loginUser = async (req, res) => {
 
     await user.save();
 
-    res.cookie("authToken", refreshToken, {
-      httpOnly: true,
-      maxAge: 24 * 60 * 60 * 1000,
-    });
-
     return res.status(200).send(SendResponse(200, "Success Login", null, user));
   } catch (error) {
     return res.status(500).send(SendResponse(500, "Internal Server Error", error, null));
@@ -244,7 +244,10 @@ exports.loginUser = async (req, res) => {
 
 exports.logoutUser = async (req, res) => {
   try {
-    res.clearCookie("authToken");
+    const id = res.locals.id;
+    const user = await User.findByPk(id);
+
+    await user.update({ accessToken: "" });
     return res.status(204).send(SendResponse(204, "Success Logout User", null, null));
   } catch (error) {
     return res.status(500).send(SendResponse(500, "Internal Server Error", error, null));

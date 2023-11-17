@@ -14,7 +14,7 @@ const { Authenticated, AuthorizeEmployeeRole } = require("../middleware/Authoriz
 router.get("/", getInventories);
 router.get("/:id", getInventory);
 router.put("/inventory-count/:id", updateInventoryCount);
-router.post("/", Authenticated, AuthorizeEmployeeRole, createInventory);
+router.post("/", createInventory);
 router.put("/inventory-profile/:id", Authenticated, AuthorizeEmployeeRole, updateInventoryProfile);
 router.delete("/:id", Authenticated, AuthorizeEmployeeRole, deleteInventory);
 
