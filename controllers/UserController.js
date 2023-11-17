@@ -1,8 +1,8 @@
 const Joi = require("joi");
-const SendResponse = require("../helpers/SendResponse.js");
 const { Op } = require("sequelize");
 
 const { User, Role } = require("../models/index.js");
+const SendResponse = require("../helpers/SendResponse.js");
 const { GenerateToken } = require("../helpers/GenerateToken.js");
 const { PasswordHashing, PasswordCompare } = require("../helpers/PasswordHelpers.js");
 
@@ -38,6 +38,25 @@ exports.getUser = async (req, res) => {
     if (!user) return res.status(404).send(SendResponse(404, "User Not Found", null, null));
 
     return res.status(200).send(SendResponse(200, "Success", null, user));
+  } catch (error) {
+    return res.status(500).send(SendResponse(500, "Internal Server Error", error, null));
+  }
+};
+
+exports.getUserProfile = async (req, res) => {
+  try {
+    const { id } = res.locals;
+
+    const user = await User.findByPk(id, {
+      attributes: ["id", "fullName", "email"],
+      include: "userRole",
+    });
+
+    if (!user) {
+      return res.status(403).send(SendResponse(403, "Forbidden", null, null));
+    }
+
+    return res.status(200).send(SendResponse(200, "Success Get Profile", null, user));
   } catch (error) {
     return res.status(500).send(SendResponse(500, "Internal Server Error", error, null));
   }

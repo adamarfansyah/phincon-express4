@@ -8,6 +8,7 @@ const {
   deleteUser,
   loginUser,
   logoutUser,
+  getUserProfile,
 } = require("../controllers/UserController");
 const { Authenticated, AuthorizeAdminRole } = require("../middleware/Authorization");
 
@@ -15,8 +16,10 @@ const express = require("express");
 
 const router = express.Router();
 
+router.get("/user-profile", Authenticated, getUserProfile);
 router.get("/", Authenticated, AuthorizeAdminRole, getUsers);
 router.get("/:identifier", Authenticated, AuthorizeAdminRole, getUser);
+
 router.post("/", Authenticated, AuthorizeAdminRole, createUser);
 router.put("/user-role/:id", Authenticated, AuthorizeAdminRole, updateUserRole);
 router.delete("/:id", Authenticated, AuthorizeAdminRole, deleteUser);

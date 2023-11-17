@@ -11,8 +11,10 @@ const Authenticated = (req, res, next) => {
     }
 
     const decoded = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
+
     res.locals.roleId = decoded.roleId;
     res.locals.id = decoded.id;
+
     next();
   } catch (error) {
     return res.status(500).send(SendResponse(500, "Internal Server Error", error, null));

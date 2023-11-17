@@ -1,7 +1,7 @@
 const Joi = require("joi");
-const SendResponse = require("../helpers/SendResponse.js");
 
 const { Category } = require("../models/index.js");
+const SendResponse = require("../helpers/SendResponse.js");
 
 exports.getCategories = async (_, res) => {
   try {

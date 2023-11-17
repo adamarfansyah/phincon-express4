@@ -1,8 +1,8 @@
 const Joi = require("joi");
-const SendResponse = require("../helpers/SendResponse.js");
 const { Op } = require("sequelize");
 
 const { Inventory, Category } = require("../models/index.js");
+const SendResponse = require("../helpers/SendResponse.js");
 const UploadToImgbb = require("../helpers/UploadToImgbb.js");
 
 exports.getInventories = async (_, res) => {
